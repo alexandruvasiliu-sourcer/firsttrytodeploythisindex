@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestiune Apartamente Închiriere</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            padding: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .apartment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .apartment-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .apartment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .apartment-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .apartment-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .apartment-info {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .notification-item {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+        
+        .notification-item.urgent {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        
+        .notification-item.info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .notification-date {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .history-table th,
+        .history-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .history-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        .history-table tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-badge.occupied {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge.vacant {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        
+        .summary-card h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .summary-card .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .buttons-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Gestiune Apartamente Închiriere</h1>
+            <p>Administrare completă a apartamentelor tale cu notificări automate și calcul utilități</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('dashboard')">Tablou de bord</button>
+                <button class="tab" onclick="switchTab('apartments')">Apartamente</button>
+                <button class="tab" onclick="switchTab('notifications')">Notificări</button>
+                <button class="tab" onclick="switchTab('history')">Istoric</button>
+                <button class="tab" onclick="switchTab('reports')">Rapoarte</button>
+            </div>
+            
+            <div id="dashboard" class="tab-content active">
+                <div class="summary-cards" id="summaryCards"></div>
+                <h2 style="margin-bottom: 20px;">Apartamentele tale</h2>
+                <div class="apartment-grid" id="apartmentDashboard"></div>
+                <button class="btn" onclick="openAddApartmentModal()">+ Adaugă apartament nou</button>
+            </div>
+            
+            <div id="apartments" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Gestionare apartamente</h2>
+                <div class="apartment-grid" id="apartmentList"></div>
+                <button class="btn" onclick="openAddApartmentModal()">+ Adaugă apartament nou</button>
+            </div>
+            
+            <div id="notifications" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Notificări și reminderuri</h2>
+                <div id="notificationsList"></div>
+            </div>
+            
+            <div id="history" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Istoric și înregistrări</h2>
+                <div class="form-group">
+                    <label>Selectează apartamentul</label>
+                    <select id="historyApartmentSelect" onchange="loadHistory()">
+                        <option value="">Toate apartamentele</option>
+                    </select>
+                </div>
+                <div id="historyContent"></div>
+            </div>
+            
+            <div id="reports" class="tab-content">
+                <h2 style="margin-bottom: 20px;">Rapoarte și analize</h2>
+                <div id="reportsContent"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal adaugare apartament -->
+    <div id="addApartmentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Adaugă apartament nou</div>
+            <form id="addApartmentForm">
+                <div class="form-group">
+                    <label>Nume apartament *</label>
+                    <input type="text" id="apartmentName" required placeholder="ex: Apartament Centru">
+                </div>
+                <div class="form-group">
+                    <label>Chiria lunară (RON) *</label>
+                    <input type="number" id="monthlyRent" required step="0.01" placeholder="ex: 1500">
+                </div>
+                <div class="form-group">
+                    <label>Întreținere lunară (RON) *</label>
+                    <input type="number" id="maintenance" required step="0.01" placeholder="ex: 250">
+                </div>
+                <div class="buttons-row">
+                    <button type="submit" class="btn">Salvează apartament</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddApartmentModal()">Anulează</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal detalii apartament -->
+    <div id="apartmentDetailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="apartmentDetailsTitle"></div>
+            <div id="apartmentDetailsContent"></div>
+        </div>
+    </div>
+    
+    <!-- Modal adaugare chiriaș -->
+    <div id="addTenantModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Adaugă chiriaș nou</div>
+            <form id="addTenantForm">
+                <input type="hidden" id="tenantApartmentId">
+                <div class="form-group">
+                    <label>Nume chiriaș *</label>
+                    <input type="text" id="tenantName" required placeholder="ex: Ion Popescu">
+                </div>
+                <div class="form-group">
+                    <label>Data intrării în apartament *</label>
+                    <input type="date" id="moveInDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Index inițial electricitate (kWh) *</label>
+                    <input type="number" id="initialElectricity" required step="0.01" placeholder="ex: 1234.56">
+                </div>
+                <div class="form-group">
+                    <label>Index inițial gaze (m³) *</label>
+                    <input type="number" id="initialGas" required step="0.01" placeholder="ex: 567.89">
+                </div>
+                <div class="form-group">
+                    <label>Index inițial apă (m³) *</label>
+                    <input type="number" id="initialWater" required step="0.01" placeholder="ex: 234.56">
+                </div>
+                <div class="buttons-row">
+                    <button type="submit" class="btn">Salvează chiriaș</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeAddTenantModal()">Anulează</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal citire contoare -->
+    <div id="readMetersModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Înregistrare citire contoare</div>
+            <form id="readMetersForm">
+                <input type="hidden" id="metersApartmentId">
+                <div class="form-group">
+                    <label>Data citirii *</label>
+                    <input type="date" id="readingDate" required>
+                </div>
+                <div class="form-group">
+                    <label>Index electricitate (kWh) *</label>
+                    <input type="number" id="currentElectricity" required step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Index gaze (m³) *</label>
+                    <input type="number" id="currentGas" required step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>Index apă (m³) *</label>
+                    <input type="number" id="currentWater" required step="0.01">
+                </div>
+                <div class="buttons-row">
+                    <button type="submit" class="btn">Calculează și salvează</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeReadMetersModal()">Anulează</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Structura de date pentru aplicație
+        let apartments = [];
+        let history = [];
+        
+        // Constante pentru calcule - toate tarifele sunt exacte conform specificațiilor
+        const ELECTRICITY_PRICE = 1.16; // RON per kWh
+        const GAS_FORMULA = {
+            calorificPower: 10.813,      // Puterea calorică a gazului natural
+            pricePerKWh: 0.25620,        // Tariful per kWh
+            vat: 1.21                     // TVA 21%
+        };
+        const WATER_FORMULA = {
+            potable: { price: 9.97, vat: 1.21 },      // Apă potabilă + TVA
+            sewage: { price: 7.33, vat: 1.21 },       // Canalizare-epurare + TVA
+            rainwater: { volume: 1.380, price: 10.12, vat: 1.21 }  // Apă meteorică (fix) + TVA
+        };
+        const TV_INTERNET = 70; // RON fix pentru toate apartamentele
+        
+        // Zile importante pentru notificări - conform calendarului furnizorilor
+        const NOTIFICATION_DAYS = {
+            electricity: { reading: [22, 26], bill: 23 },  // Citire 22-26, factură pe 23
+            gas: { reading: [21, 25], bill: 28 },          // Citire 21-25, factură pe 28
+            water: { reading: [21, 25], bill: 28 },        // Citire 21-25, factură pe 28
+            maintenance: { bill: 15 },                      // Factură pe 15
+            tvInternet: { bill: 10 }                        // Factură pe 10
+        };
+        
+        // Încărcare date din localStorage - datele persistă între sesiuni
+        function loadData() {
+            const savedApartments = localStorage.getItem('apartments');
+            const savedHistory = localStorage.getItem('history');
+            
+            if (savedApartments) {
+                apartments = JSON.parse(savedApartments);
+            }
+            
+            if (savedHistory) {
+                history = JSON.parse(savedHistory);
+            }
+        }
+        
+        // Salvare date în localStorage - apelată după fiecare modificare
+        function saveData() {
+            localStorage.setItem('apartments', JSON.stringify(apartments));
+            localStorage.setItem('history', JSON.stringify(history));
+        }
+        
+        // Calculează costul electricității: consum (kWh) × 1.16 RON/kWh
+        function calculateElectricity(consumption) {
+            return consumption * ELECTRICITY_PRICE;
+        }
+        
+        // Calculează costul gazelor: consum (m³) × 10.813 × 0.25620 × 1.21
+        // Formula reflectă conversia la kWh și aplicarea tarifului cu TVA
+        function calculateGas(consumption) {
+            return consumption * GAS_FORMULA.calorificPower * GAS_FORMULA.pricePerKWh * GAS_FORMULA.vat;
+        }
+        
+        // Calculează costul apei - cele trei componente separate
+        function calculateWater(consumption) {
+            // Componenta 1: Apă potabilă consumată
+            const potable = consumption * WATER_FORMULA.potable.price * WATER_FORMULA.potable.vat;
+            // Componenta 2: Canalizare-epurare (același volum ca apa consumată)
+            const sewage = consumption * WATER_FORMULA.sewage.price * WATER_FORMULA.sewage.vat;
+            // Componenta 3: Apă meteorică (taxă fixă pentru canalizarea apei pluviale)
+            const rainwater = WATER_FORMULA.rainwater.volume * WATER_FORMULA.rainwater.price * WATER_FORMULA.rainwater.vat;
+            
+            return potable + sewage + rainwater;
+        }
+        
+        // Schimbă tab-ul activ în interfață
+        function switchTab(tabName) {
+            // Dezactivează toate tab-urile și conținutul
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            // Activează tab-ul și conținutul selectat
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // Randează conținutul specific fiecărui tab
+            if (tabName === 'dashboard') {
+                renderDashboard();
+            } else if (tabName === 'apartments') {
+                renderApartments();
+            } else if (tabName === 'notifications') {
+                renderNotifications();
+            } else if (tabName === 'history') {
+                renderHistoryTab();
+            } else if (tabName === 'reports') {
+                renderReports();
+            }
+        }
+        
+        // Randează tabloul de bord principal cu statistici și apartamente
+        function renderDashboard() {
+            // Carduri cu statistici generale
+            const summaryHtml = `
+                <div class="summary-card">
+                    <h3>Total apartamente</h3>
+                    <div class="value">${apartments.length}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Apartamente ocupate</h3>
+                    <div class="value">${apartments.filter(a => a.currentTenant).length}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Apartamente libere</h3>
+                    <div class="value">${apartments.filter(a => !a.currentTenant).length}</div>
+                </div>
+                <div class="summary-card">
+                    <h3>Notificări active</h3>
+                    <div class="value">${getNotifications().length}</div>
+                </div>
+            `;
+            
+            document.getElementById('summaryCards').innerHTML = summaryHtml;
+            
+            // Grid cu carduri pentru fiecare apartament
+            const apartmentHtml = apartments.map(apt => {
+                const status = apt.currentTenant ? 'occupied' : 'vacant';
+                const statusText = apt.currentTenant ? 'Ocupat' : 'Liber';
+                const tenantInfo = apt.currentTenant ? 
+                    `<div class="apartment-info">Chiriaș: ${apt.currentTenant.name}</div>
+                     <div class="apartment-info">De la: ${new Date(apt.currentTenant.moveInDate).toLocaleDateString('ro-RO')}</div>` 
+                    : '<div class="apartment-info">Momentan neînchiriat</div>';
+                
+                return `
+                    <div class="apartment-card" onclick="openApartmentDetails('${apt.id}')">
+                        <div class="apartment-name">${apt.name}</div>
+                        <span class="status-badge ${status}">${statusText}</span>
+                        ${tenantInfo}
+                        <div class="apartment-info">Chirie: ${apt.monthlyRent} RON</div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('apartmentDashboard').innerHTML = apartmentHtml || 
+                '<p>Nu ai încă apartamente adăugate. Apasă butonul de mai jos pentru a adăuga primul apartament.</p>';
+        }
+        
+        // Randează lista de apartamente (folosește aceeași logică ca dashboard-ul)
+        function renderApartments() {
+            renderDashboard();
+            document.getElementById('apartmentList').innerHTML = document.getElementById('apartmentDashboard').innerHTML;
+        }
+        
+        // Generează notificări inteligente bazate pe calendar și date apartamente
+        function getNotifications() {
+            const today = new Date();
+            const currentDay = today.getDate();
+            const notifications = [];
+            
+            // Parcurge fiecare apartament și verifică ce notificări sunt necesare
+            apartments.forEach(apt => {
+                if (!apt.currentTenant) return; // Skip apartamentele libere
+                
+                const moveInDay = new Date(apt.currentTenant.moveInDate).getDate();
+                
+                // Notificare pentru încasare chirie (cu 2 zile înainte de data intrării)
+                if (currentDay === moveInDay - 2 || (moveInDay <= 2 && currentDay === 28 + moveInDay)) {
+                    notifications.push({
+                        type: 'urgent',
+                        title: `Încasare chirie - ${apt.name}`,
+                        message: `În 2 zile trebuie să încasezi chiria de la ${apt.currentTenant.name}`,
+                        date: new Date(today.getFullYear(), today.getMonth(), moveInDay),
+                        apartmentId: apt.id
+                    });
+                }
+                
+                // Notificare pentru citire contor electricitate (prima zi a perioadei)
+                if (currentDay === NOTIFICATION_DAYS.electricity.reading[0]) {
+                    notifications.push({
+                        type: 'info',
+                        title: `Citire contor electricitate - ${apt.name}`,
+                        message: `Solicită citirea contorului de electricitate de la ${apt.currentTenant.name} (perioada ${NOTIFICATION_DAYS.electricity.reading[0]}-${NOTIFICATION_DAYS.electricity.reading[1]})`,
+                        apartmentId: apt.id
+                    });
+                }
+                
+                // Notificare pentru citire contoare gaze și apă (prima zi a perioadei)
+                if (currentDay === NOTIFICATION_DAYS.gas.reading[0]) {
+                    notifications.push({
+                        type: 'info',
+                        title: `Citire contoare gaze și apă - ${apt.name}`,
+                        message: `Solicită citirea contoarelor de gaze și apă de la ${apt.currentTenant.name} (perioada ${NOTIFICATION_DAYS.gas.reading[0]}-${NOTIFICATION_DAYS.gas.reading[1]})`,
+                        apartmentId: apt.id
+                    });
+                }
+                
+                // Notificări pentru plăți facturi (cu o zi înainte de scadență)
+                if (currentDay === NOTIFICATION_DAYS.maintenance.bill - 1) {
+                    notifications.push({
+                        type: 'urgent',
+                        title: `Plată întreținere - ${apt.name}`,
+                        message: `Mâine este termen de plată pentru întreținere`,
+                        apartmentId: apt.id
+                    });
+                }
+                
+                if (currentDay === NOTIFICATION_DAYS.tvInternet.bill - 1) {
+                    notifications.push({
+                        type: 'urgent',
+                        title: `Plată TV+Internet - ${apt.name}`,
+                        message: `Mâine este termen de plată pentru TV și Internet`,
+                        apartmentId: apt.id
+                    });
+                }
+                
+                if (currentDay === NOTIFICATION_DAYS.electricity.bill - 1) {
+                    notifications.push({
+                        type: 'urgent',
+                        title: `Plată electricitate - ${apt.name}`,
+                        message: `Mâine este termen de plată pentru factura de electricitate`,
+                        apartmentId: apt.id
+                    });
+                }
+                
+                if (currentDay === NOTIFICATION_DAYS.gas.bill - 1) {
+                    notifications.push({
+                        type: 'urgent',
+                        title: `Plată gaze și apă - ${apt.name}`,
+                        message: `Mâine este termen de plată pentru facturile de gaze și apă`,
+                        apartmentId: apt.id
+                    });
+                }
+            });
+            
+            return notifications;
+        }
+        
+        // Randează lista de notificări în interfață
+        function renderNotifications() {
+            const notifications = getNotifications();
+            
+            if (notifications.length === 0) {
+                document.getElementById('notificationsList').innerHTML = 
+                    '<p>Nu ai notificări active în acest moment. Verifică din nou când se apropie termenele importante.</p>';
+                return;
+            }
+            
+            const html = notifications.map(notif => `
+                <div class="notification-item ${notif.type}">
+                    <div class="notification-title">${notif.title}</div>
+                    <div>${notif.message}</div>
+                    ${notif.date ? `<div class="notification-date">Data: ${notif.date.toLocaleDateString('ro-RO')}</div>` : ''}
+                </div>
+            `).join('');
+            
+            document.getElementById('notificationsList').innerHTML = html;
+        }
+        
+        // Inițializează tab-ul de istoric
+        function renderHistoryTab() {
+            const selectHtml = '<option value="">Toate apartamentele</option>' + 
+                apartments.map(apt => `<option value="${apt.id}">${apt.name}</option>`).join('');
+            document.getElementById('historyApartmentSelect').innerHTML = selectHtml;
+            loadHistory();
+        }
+        
+        // Încarcă și afișează istoricul (ultimele 12 luni)
+        function loadHistory() {
+            const selectedAptId = document.getElementById('historyApartmentSelect').value;
+            let filteredHistory = history;
+            
+            // Filtrare după apartamentul selectat
+            if (selectedAptId) {
+                filteredHistory = history.filter(h => h.apartmentId === selectedAptId);
+            }
+            
+            // Limitare la ultimele 12 luni
+            const twelveMonthsAgo = new Date();
+            twelveMonthsAgo.setMonth(twelveMonthsAgo.getMonth() - 12);
+            filteredHistory = filteredHistory.filter(h => new Date(h.date) >= twelveMonthsAgo);
+            
+            // Sortare cronologică inversă (cele mai recente primul)
+            filteredHistory.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (filteredHistory.length === 0) {
+                document.getElementById('historyContent').innerHTML = 
+                    '<p>Nu există înregistrări în istoric pentru selecția curentă.</p>';
+                return;
+            }
+            
+            // Tabel cu toate înregistrările istorice
+            const tableHtml = `
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Apartament</th>
+                            <th>Tip</th>
+                            <th>Detalii</th>
+                            <th>Sumă (RON)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${filteredHistory.map(h => `
+                            <tr>
+                                <td>${new Date(h.date).toLocaleDateString('ro-RO')}</td>
+                                <td>${apartments.find(a => a.id === h.apartmentId)?.name || 'N/A'}</td>
+                                <td>${h.type}</td>
+                                <td>${h.details}</td>
+                                <td>${h.amount ? h.amount.toFixed(2) : '-'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            document.getElementById('historyContent').innerHTML = tableHtml;
+        }
+        
+        // Generează rapoarte și statistici
+        function renderReports() {
+            const content = document.getElementById('reportsContent');
+            
+            // Calculează venitul total lunar din chirii
+            const totalRent = apartments.reduce((sum, apt) => {
+                return sum + (apt.currentTenant ? parseFloat(apt.monthlyRent) : 0);
+            }, 0);
+            
+            // Calculează rata de ocupare procentuală
+            const occupancyRate = apartments.length > 0 ? 
+                (apartments.filter(a => a.currentTenant).length / apartments.length * 100).toFixed(1) : 0;
+            
+            const html = `
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Venit lunar estimat din chirii</h3>
+                        <div class="value">${totalRent.toFixed(2)} RON</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Rata de ocupare</h3>
+                        <div class="value">${occupancyRate}%</div>
+                    </div>
+                </div>
+                <h3 style="margin-top: 30px; margin-bottom: 15px;">Detalii pe apartament</h3>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Apartament</th>
+                            <th>Status</th>
+                            <th>Chiriaș</th>
+                            <th>Chirie lunară</th>
+                            <th>Zile ocupare (total)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${apartments.map(apt => {
+                            const status = apt.currentTenant ? 'Ocupat' : 'Liber';
+                            const tenant = apt.currentTenant ? apt.currentTenant.name : '-';
+                            const daysOccupied = apt.currentTenant ? 
+                                Math.floor((new Date() - new Date(apt.currentTenant.moveInDate)) / (1000 * 60 * 60 * 24)) : 0;
+                            
+                            return `
+                                <tr>
+                                    <td>${apt.name}</td>
+                                    <td><span class="status-badge ${apt.currentTenant ? 'occupied' : 'vacant'}">${status}</span></td>
+                                    <td>${tenant}</td>
+                                    <td>${apt.monthlyRent} RON</td>
+                                    <td>${daysOccupied}</td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+            
+            content.innerHTML = html;
+        }
+        
+        // Funcții pentru modal-ul de adăugare apartament
+        function openAddApartmentModal() {
+            document.getElementById('addApartmentModal').classList.add('active');
+        }
+        
+        function closeAddApartmentModal() {
+            document.getElementById('addApartmentModal').classList.remove('active');
+            document.getElementById('addApartmentForm').reset();
+        }
+        
+        // Handler pentru salvarea unui apartament nou
+        document.getElementById('addApartmentForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const apartment = {
+                id: Date.now().toString(), // ID unic bazat pe timestamp
+                name: document.getElementById('apartmentName').value,
+                monthlyRent: parseFloat(document.getElementById('monthlyRent').value),
+                maintenance: parseFloat(document.getElementById('maintenance').value),
+                currentTenant: null,       // Inițial fără chiriaș
+                meterReadings: []          // Istoric citiri contoare gol
+            };
+            
+            apartments.push(apartment);
+            saveData();
+            closeAddApartmentModal();
+            renderDashboard();
+            
+            alert('Apartament adăugat cu succes!');
+        });
+        
+        // Funcții pentru modal-ul de detalii apartament
+        function openApartmentDetails(apartmentId) {
+            const apt = apartments.find(a => a.id === apartmentId);
+            if (!apt) return;
+            
+            document.getElementById('apartmentDetailsTitle').textContent = apt.name;
+            
+            let content = `
+                <div style="margin-bottom: 20px;">
+                    <strong>Chirie lunară:</strong> ${apt.monthlyRent} RON<br>
+                    <strong>Întreținere:</strong> ${apt.maintenance} RON<br>
+                    <strong>TV + Internet:</strong> ${TV_INTERNET} RON<br>
+                    <strong>Status:</strong> ${apt.currentTenant ? 'Ocupat' : 'Liber'}
+                </div>
+            `;
+            
+            // Afișează detalii chiriaș dacă există
+            if (apt.currentTenant) {
+                const tenant = apt.currentTenant;
+                content += `
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <h3 style="margin-bottom: 10px;">Chiriaș curent</h3>
+                        <strong>Nume:</strong> ${tenant.name}<br>
+                        <strong>Data intrării:</strong> ${new Date(tenant.moveInDate).toLocaleDateString('ro-RO')}<br>
+                        <strong>Index inițial electricitate:</strong> ${tenant.initialElectricity} kWh<br>
+                        <strong>Index inițial gaze:</strong> ${tenant.initialGas} m³<br>
+                        <strong>Index inițial apă:</strong> ${tenant.initialWater} m³
+                    </div>
+                    <div class="buttons-row">
+                        <button class="btn" onclick="openReadMetersModal('${apt.id}')">Citire contoare</button>
+                        <button class="btn btn-danger" onclick="removeTenant('${apt.id}')">Elimină chiriaș</button>
+                    </div>
+                `;
+            } else {
+                content += `
+                    <button class="btn" onclick="openAddTenantModal('${apt.id}')">Adaugă chiriaș</button>
+                `;
+            }
+            
+            content += `
+                <div class="buttons-row" style="margin-top: 20px;">
+                    <button class="btn btn-danger" onclick="deleteApartment('${apt.id}')">Șterge apartament</button>
+                    <button class="btn btn-secondary" onclick="closeApartmentDetailsModal()">Închide</button>
+                </div>
+            `;
+            
+            document.getElementById('apartmentDetailsContent').innerHTML = content;
+            document.getElementById('apartmentDetailsModal').classList.add('active');
+        }
+        
+        function closeApartmentDetailsModal() {
+            document.getElementById('apartmentDetailsModal').classList.remove('active');
+        }
+        
+        // Șterge un apartament și tot istoricul asociat
+        function deleteApartment(apartmentId) {
+            if (!confirm('Sigur vrei să ștergi acest apartament? Această acțiune nu poate fi anulată și va șterge tot istoricul asociat.')) {
+                return;
+            }
+            
+            apartments = apartments.filter(a => a.id !== apartmentId);
+            history = history.filter(h => h.apartmentId !== apartmentId);
+            saveData();
+            closeApartmentDetailsModal();
+            renderDashboard();
+            
+            alert('Apartament șters cu succes!');
+        }
+        
+        // Funcții pentru modal-ul de adăugare chiriaș
+        function openAddTenantModal(apartmentId) {
+            document.getElementById('tenantApartmentId').value = apartmentId;
+            closeApartmentDetailsModal();
+            document.getElementById('addTenantModal').classList.add('active');
+        }
+        
+        function closeAddTenantModal() {
+            document.getElementById('addTenantModal').classList.remove('active');
+            document.getElementById('addTenantForm').reset();
+        }
+        
+        // Handler pentru salvarea unui chiriaș nou
+        document.getElementById('addTenantForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const apartmentId = document.getElementById('tenantApartmentId').value;
+            const apt = apartments.find(a => a.id === apartmentId);
+            
+            if (!apt) return;
+            
+            // Creează obiectul chiriaș cu toate datele
+            apt.currentTenant = {
+                name: document.getElementById('tenantName').value,
+                moveInDate: document.getElementById('moveInDate').value,
+                initialElectricity: parseFloat(document.getElementById('initialElectricity').value),
+                initialGas: parseFloat(document.getElementById('initialGas').value),
+                initialWater: parseFloat(document.getElementById('initialWater').value)
+            };
+            
+            // Inițializează prima citire (la intrare)
+            apt.meterReadings = [{
+                date: document.getElementById('moveInDate').value,
+                electricity: apt.currentTenant.initialElectricity,
+                gas: apt.currentTenant.initialGas,
+                water: apt.currentTenant.initialWater,
+                isInitial: true
+            }];
+            
+            // Adaugă în istoric
+            history.push({
+                apartmentId: apartmentId,
+                date: new Date().toISOString(),
+                type: 'Chiriaș nou',
+                details: `${apt.currentTenant.name} a intrat în apartament`,
+                amount: null
+            });
+            
+            saveData();
+            closeAddTenantModal();
+            renderDashboard();
+            
+            alert('Chiriaș adăugat cu succes!');
+        });
+        
+        // Elimină chiriașul din apartament (păstrează istoricul)
+        function removeTenant(apartmentId) {
+            if (!confirm('Sigur vrei să elimini chiriașul? Datele acestuia vor fi păstrate în istoric.')) {
+                return;
+            }
+            
+            const apt = apartments.find(a => a.id === apartmentId);
+            if (!apt || !apt.currentTenant) return;
+            
+            // Salvează în istoric plecarea chiriașului
+            history.push({
+                apartmentId: apartmentId,
+                date: new Date().toISOString(),
+                type: 'Chiriaș plecat',
+                details: `${apt.currentTenant.name} a părăsit apartamentul`,
+                amount: null
+            });
+            
+            apt.currentTenant = null;
+            saveData();
+            closeApartmentDetailsModal();
+            renderDashboard();
+            
+            alert('Chiriaș eliminat cu succes!');
+        }
+        
+        // Funcții pentru modal-ul de citire contoare
+        function openReadMetersModal(apartmentId) {
+            document.getElementById('metersApartmentId').value = apartmentId;
+            document.getElementById('readingDate').valueAsDate = new Date();
+            closeApartmentDetailsModal();
+            document.getElementById('readMetersModal').classList.add('active');
+        }
+        
+        function closeReadMetersModal() {
+            document.getElementById('readMetersModal').classList.remove('active');
+            document.getElementById('readMetersForm').reset();
+        }
+        
+        // Handler pentru salvarea citirii contoarelor și calcularea costurilor
+        document.getElementById('readMetersForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const apartmentId = document.getElementById('metersApartmentId').value;
+            const apt = apartments.find(a => a.id === apartmentId);
+            
+            if (!apt || !apt.currentTenant) return;
+            
+            const readingDate = document.getElementById('readingDate').value;
+            const currentElectricity = parseFloat(document.getElementById('currentElectricity').value);
+            const currentGas = parseFloat(document.getElementById('currentGas').value);
+            const currentWater = parseFloat(document.getElementById('currentWater').value);
+            
+            // Găsește ultima citire pentru a calcula consumurile
+            const lastReading = apt.meterReadings[apt.meterReadings.length - 1];
+            
+            // Calculează consumurile (diferența dintre citirea curentă și cea anterioară)
+            const electricityConsumption = currentElectricity - lastReading.electricity;
+            const gasConsumption = currentGas - lastReading.gas;
+            const waterConsumption = currentWater - lastReading.water;
+            
+            // Validare consumuri pozitive
+            if (electricityConsumption < 0 || gasConsumption < 0 || waterConsumption < 0) {
+                alert('Atenție! Consumurile calculate sunt negative. Verifică dacă ai introdus corect indexurile.');
+                return;
+            }
+            
+            // Calculează costurile pentru fiecare utilitate
+            const electricityCost = calculateElectricity(electricityConsumption);
+            const gasCost = calculateGas(gasConsumption);
+            const waterCost = calculateWater(waterConsumption);
+            const totalUtilities = electricityCost + gasCost + waterCost + apt.maintenance + TV_INTERNET;
+            const totalWithRent = totalUtilities + parseFloat(apt.monthlyRent);
+            
+            // Salvează citirea cu toate calculele
+            apt.meterReadings.push({
+                date: readingDate,
+                electricity: currentElectricity,
+                gas: currentGas,
+                water: currentWater,
+                electricityConsumption,
+                gasConsumption,
+                waterConsumption,
+                electricityCost,
+                gasCost,
+                waterCost,
+                maintenance: apt.maintenance,
+                tvInternet: TV_INTERNET,
+                totalUtilities,
+                totalWithRent
+            });
+            
+            // Adaugă în istoric
+            history.push({
+                apartmentId: apartmentId,
+                date: new Date().toISOString(),
+                type: 'Citire contoare',
+                details: `Electricitate: ${electricityConsumption.toFixed(2)} kWh, Gaze: ${gasConsumption.toFixed(2)} m³, Apă: ${waterConsumption.toFixed(2)} m³`,
+                amount: totalWithRent
+            });
+            
+            saveData();
+            closeReadMetersModal();
+            
+            // Afișează rezultatele detaliate
+            alert(`Citire contoare salvată!
+
+CONSUMURI:
+• Electricitate: ${electricityConsumption.toFixed(2)} kWh
+• Gaze: ${gasConsumption.toFixed(2)} m³
+• Apă: ${waterConsumption.toFixed(2)} m³
+
+COSTURI CALCULATE:
+• Electricitate: ${electricityCost.toFixed(2)} RON
+• Gaze: ${gasCost.toFixed(2)} RON
+• Apă: ${waterCost.toFixed(2)} RON
+• Întreținere: ${apt.maintenance.toFixed(2)} RON
+• TV + Internet: ${TV_INTERNET.toFixed(2)} RON
+
+TOTAL UTILITĂȚI: ${totalUtilities.toFixed(2)} RON
+TOTAL CU CHIRIE: ${totalWithRent.toFixed(2)} RON
+
+Încasează această sumă de la ${apt.currentTenant.name}.`);
+        });
+        
+        // Inițializare aplicație la încărcarea paginii
+        function init() {
+            loadData();
+            renderDashboard();
+            
+            // Verifică permisiuni pentru notificări browser
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            
+            // Verifică notificările la fiecare oră
+            setInterval(() => {
+                const notifications = getNotifications();
+                if (notifications.length > 0 && 'Notification' in window && Notification.permission === 'granted') {
+                    notifications.forEach(notif => {
+                        new Notification(notif.title, {
+                            body: notif.message,
+                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">🏠</text></svg>',
+                            requireInteraction: true
+                        });
+                    });
+                }
+            }, 3600000); // Verificare la fiecare oră (3600000 milisecunde)
+        }
+        
+        // Pornește aplicația când DOM-ul este complet încărcat
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

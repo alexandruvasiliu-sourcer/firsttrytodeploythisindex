@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generator Iconițe PNG</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .icon-preview {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 10px;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover {
+            background: #5568d3;
+        }
+        canvas {
+            border: 1px solid #ddd;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏠 Generator Iconițe pentru Aplicație</h1>
+    <p>Acest tool generează iconițele PNG necesare pentru aplicația PWA.</p>
+    
+    <div class="icon-preview">
+        <h3>Previzualizare și Download:</h3>
+        <div>
+            <canvas id="canvas192" width="192" height="192"></canvas>
+            <canvas id="canvas512" width="512" height="512"></canvas>
+        </div>
+        <div>
+            <button onclick="downloadIcon(192)">⬇️ Download 192x192</button>
+            <button onclick="downloadIcon(512)">⬇️ Download 512x512</button>
+        </div>
+    </div>
+    
+    <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin-top: 20px;">
+        <strong>📝 Instrucțiuni:</strong>
+        <ol>
+            <li>Apasă butonul "Download 192x192" și salvează ca <strong>icon-192.png</strong></li>
+            <li>Apasă butonul "Download 512x512" și salvează ca <strong>icon-512.png</strong></li>
+            <li>Pune ambele fișiere în același folder cu <code>index.html</code></li>
+            <li>Gata! Aplicația ta PWA va avea iconițe frumoase!</li>
+        </ol>
+    </div>
+
+    <script>
+        // Funcție pentru desenarea iconului
+        function drawIcon(ctx, size) {
+            // Fundal gradient
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            
+            // Fundal rotunjit
+            const cornerRadius = size * 0.2;
+            ctx.fillStyle = gradient;
+            roundRect(ctx, 0, 0, size, size, cornerRadius);
+            ctx.fill();
+            
+            // Scalare pentru diferite dimensiuni
+            const scale = size / 192;
+            ctx.scale(scale, scale);
+            
+            // Clădire (apartament)
+            const offsetX = 46;
+            const offsetY = 40;
+            
+            // Corp clădire
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.fillRect(offsetX, offsetY + 30, 100, 82);
+            
+            // Acoperiș
+            ctx.beginPath();
+            ctx.moveTo(offsetX - 10, offsetY + 30);
+            ctx.lineTo(offsetX + 50, offsetY + 10);
+            ctx.lineTo(offsetX + 110, offsetY + 30);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Ferestre
+            ctx.fillStyle = 'rgba(102, 126, 234, 0.7)';
+            ctx.fillRect(offsetX + 15, offsetY + 45, 20, 20);
+            ctx.fillRect(offsetX + 65, offsetY + 45, 20, 20);
+            ctx.fillRect(offsetX + 15, offsetY + 75, 20, 20);
+            ctx.fillRect(offsetX + 65, offsetY + 75, 20, 20);
+            
+            // Ușă
+            ctx.fillStyle = 'rgba(118, 75, 162, 0.8)';
+            ctx.fillRect(offsetX + 40, offsetY + 85, 20, 27);
+            
+            // Mâner ușă
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(offsetX + 55, offsetY + 98, 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Simbol bani (pentru închiriere)
+            ctx.fillStyle = '#ffc107';
+            ctx.beginPath();
+            ctx.arc(150, 60, 22, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Text RON
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('₺', 150, 60);
+        }
+        
+        // Funcție pentru dreptunghi rotunjit
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+        
+        // Desenare iconi la încărcarea paginii
+        window.onload = function() {
+            // Icon 192x192
+            const canvas192 = document.getElementById('canvas192');
+            const ctx192 = canvas192.getContext('2d');
+            drawIcon(ctx192, 192);
+            
+            // Icon 512x512
+            const canvas512 = document.getElementById('canvas512');
+            const ctx512 = canvas512.getContext('2d');
+            drawIcon(ctx512, 512);
+        };
+        
+        // Funcție pentru download
+        function downloadIcon(size) {
+            const canvas = document.getElementById('canvas' + size);
+            const link = document.createElement('a');
+            link.download = 'icon-' + size + '.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+    </script>
+</body>
+</html>
